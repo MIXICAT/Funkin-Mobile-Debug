@@ -42,7 +42,7 @@ jobs:
         id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
-          ndk-version: 29.0.13113456
+          ndk-version: 27.2.12479018
           link-to-sdk: true
 
       - name: Set up Haxe and project libraries
