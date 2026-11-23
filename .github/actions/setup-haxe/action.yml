@@ -39,18 +39,18 @@ runs:
     shell: bash
     run: |
       ls -lah /usr/lib/x86_64-linux-gnu/
-      apt-get update
-      apt-get install -y \
+      sudo apt-get update
+      sudo apt-get install -y \
         g++ \
         libx11-dev libxi-dev libxext-dev libxinerama-dev libxrandr-dev \
         libgl-dev libgl1-mesa-dev \
         libasound2-dev libpulse-dev
-      ln -s /usr/lib/x86_64-linux-gnu/libffi.so.8 /usr/lib/x86_64-linux-gnu/libffi.so.6 || true
+      sudo ln -s /usr/lib/x86_64-linux-gnu/libffi.so.8 /usr/lib/x86_64-linux-gnu/libffi.so.6 || true
   - name: Install linux-specific dependencies
     if: ${{ runner.os == 'Linux' && contains(inputs.targets, 'linux') }}
     shell: bash
     run: |
-      apt-get install -y libvlc-dev libvlccore-dev
+      sudo apt-get install -y libvlc-dev libvlccore-dev
 
   - name: Config haxelib
     shell: bash
