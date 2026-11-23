@@ -1,0 +1,85 @@
+name: Android Developer Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-developer-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-android:
+    name: Build Android debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+
+    steps:
+      - name: Check out repository and public submodules
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-29" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: 29.0.13113456
+          link-to-sdk: true
+
+      - name: Set up Haxe and project libraries
+        uses: ./.github/actions/setup-haxe
+        with:
+          haxe: '4.3.7'
+          targets: android
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Lime for Android
+        shell: bash
+        run: |
+          haxelib run lime setup -alias -y
+          haxelib run lime config ANDROID_SDK "$ANDROID_HOME"
+          haxelib run lime config ANDROID_NDK_ROOT "${{ steps.setup-ndk.outputs.ndk-path }}"
+          haxelib run lime config JAVA_HOME "$JAVA_HOME"
+          haxelib run lime config ANDROID_SETUP true
+          haxelib run lime rebuild hxcpp
+
+      - name: Compile developer APK
+        shell: bash
+        run: |
+          haxelib run lime build android -debug \
+            -DFEATURE_DEBUG_FUNCTIONS \
+            -DFEATURE_DEBUG_MENU \
+            -DFEATURE_ANIMATION_EDITOR \
+            -DFEATURE_CHART_EDITOR \
+            -DFEATURE_STAGE_EDITOR \
+            -DNO_FEATURE_NEWGROUNDS \
+            -DNO_FEATURE_MOBILE_ADVERTISEMENTS \
+            -DNO_FEATURE_MOBILE_IAP \
+            -DNO_FEATURE_MOBILE_IAR \
+            -DNO_FEATURE_MOBILE_WEBVIEW \
+            -DNO_FEATURE_MOBILE_AGESIGNALS
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Funkin-Mobile-Debug-Android
+          path: export/debug/android/bin/**/*.apk
+          if-no-files-found: error
+          retention-days: 14
