@@ -67,6 +67,10 @@ jobs:
           haxelib run lime config ANDROID_SETUP true
           haxelib run lime rebuild hxcpp
 
+          # The Git checkout does not include prebuilt Android ndlls.
+          # Build the Android debug native libraries required by the APK step.
+          haxelib run lime rebuild android -debug
+
       - name: Compile developer APK
         shell: bash
         run: |
