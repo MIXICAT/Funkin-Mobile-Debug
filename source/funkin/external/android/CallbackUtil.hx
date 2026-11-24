@@ -29,6 +29,12 @@ class CallbackUtil #if (lime >= '8.0.0') implements JNISafety #end
    */
   public static var onFNFCOpen:FlxTypedSignal<String->Void> = new FlxTypedSignal<String->Void>();
 
+  /** Signal emitted after an Android document has been copied into the app cache. */
+  public static var onFilePicked:FlxTypedSignal<String->String->Void> = new FlxTypedSignal<String->String->Void>();
+
+  /** Signal emitted when the Android document picker is cancelled or import fails. */
+  public static var onFilePickCancelled:FlxSignal = new FlxSignal();
+
   /**
    * Initializes the callback utility.
    */
