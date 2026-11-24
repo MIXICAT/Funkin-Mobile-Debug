@@ -9,6 +9,10 @@ import haxe.io.Path;
 import openfl.net.FileReference;
 import openfl.events.Event;
 import openfl.events.IOErrorEvent;
+#if android
+import funkin.external.android.CallbackUtil;
+import funkin.external.android.JNIUtil;
+#end
 
 using StringTools;
 
@@ -67,6 +71,58 @@ class FileUtil
    * File filter for OSU! beatmap files.
    */
   public static final FILE_FILTER_OSU:FileFilter = new FileFilter('OSU! Beatmap File', '*.osu');
+
+  #if android
+  private static var androidFilePickerInitialized:Bool = false;
+  private static var androidFileSelectCallback:Null<(SelectedFileData) -> Void> = null;
+  private static var androidFileCancelCallback:Null<() -> Void> = null;
+
+  private static function initializeAndroidFilePicker():Void
+  {
+    if (androidFilePickerInitialized) return;
+    androidFilePickerInitialized = true;
+
+    CallbackUtil.onFilePicked.add(function(path:String, name:String):Void
+    {
+      final callback = androidFileSelectCallback;
+      androidFileSelectCallback = null;
+      androidFileCancelCallback = null;
+      if (callback == null) return;
+
+      try
+      {
+        callback({name: name, bytes: Bytes.fromFile(path), fullPath: path});
+      }
+      catch (e:Dynamic)
+      {
+        trace('Failed to read imported file: $e');
+      }
+    });
+
+    CallbackUtil.onFilePickCancelled.add(function():Void
+    {
+      final callback = androidFileCancelCallback;
+      androidFileSelectCallback = null;
+      androidFileCancelCallback = null;
+      if (callback != null) callback();
+    });
+  }
+
+  private static function browseForAndroidFile(onSelect:(SelectedFileData) -> Void, ?onCancel:() -> Void):Void
+  {
+    initializeAndroidFilePicker();
+    androidFileSelectCallback = onSelect;
+    androidFileCancelCallback = onCancel;
+
+    final openPicker = JNIUtil.createStaticMethod('funkin/extensions/CallbackUtil', 'openFilePicker', '()Z');
+    if (openPicker == null || !openPicker())
+    {
+      androidFileSelectCallback = null;
+      androidFileCancelCallback = null;
+      if (onCancel != null) onCancel();
+    }
+  }
+  #end
 
   /**
    * Paths which should not be deleted or modified by scripts.
@@ -176,6 +232,8 @@ class FileUtil
     {
       onCancel();
     }
+    #elseif android
+    browseForAndroidFile(onSelect, onCancel);
     #else
     FileDialog.openFile(Lib.current.stage.window, dialogTitle, function(filepaths:Array<String>, filter):Void
     {
