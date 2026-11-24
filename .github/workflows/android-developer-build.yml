@@ -54,6 +54,13 @@ jobs:
           haxelib run lime config ANDROID_NDK_ROOT "$ANDROID_HOME/ndk/27.2.12479018"
           haxelib run lime config JAVA_HOME "$JAVA_HOME"
           haxelib run lime config ANDROID_SETUP true
+          # The pinned FunkinCrew hxcpp is a Git checkout. Bootstrap its
+          # native build tools before Lime tries to invoke hxcpp.
+          HXCPP_PATH="$(haxelib libpath hxcpp)"
+          test -d "$HXCPP_PATH/tools/run"
+          test -d "$HXCPP_PATH/tools/hxcpp"
+          (cd "$HXCPP_PATH/tools/run" && haxe compile.hxml)
+          (cd "$HXCPP_PATH/tools/hxcpp" && haxe compile.hxml)
           haxelib run lime rebuild hxcpp
 
       - name: Compile developer APK
