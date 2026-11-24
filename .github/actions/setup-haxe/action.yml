@@ -42,7 +42,7 @@ runs:
       sudo apt-get update
       sudo apt-get install -y \
         g++ \
-        libx11-dev libxi-dev libxext-dev libxinerama-dev libxrandr-dev libxcursor-dev libxss-dev \
+        libx11-dev libxi-dev libxext-dev libxinerama-dev libxrandr-dev libxcursor-dev libxss-dev libudev-dev \
         libgl-dev libgl1-mesa-dev \
         libasound2-dev libpulse-dev libdbus-1-dev \
         libwayland-dev libwayland-bin wayland-protocols
