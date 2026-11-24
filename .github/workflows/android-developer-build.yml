@@ -45,6 +45,16 @@ jobs:
           targets: android
           gh-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clear stale hxcpp precompiled headers
+        shell: bash
+        run: |
+          # The shared hxcpp cache can restore PCH files built against an older
+          # Android NDK sysroot. Keep reusable object files, but force Clang to
+          # regenerate precompiled headers against the NDK installed in this run.
+          if [ -n "${HXCPP_COMPILE_CACHE:-}" ] && [ -d "$HXCPP_COMPILE_CACHE" ]; then
+            find "$HXCPP_COMPILE_CACHE" -type f -name '*.pch' -delete
+          fi
+
       - name: Configure Lime for Android
         shell: bash
         run: |
