@@ -68,19 +68,19 @@ class SetCharacterSongEvent extends SongEvent
       return;
     }
 
-    // Remove the old sprite and its slot mapping.
-    switch (target)
-    {
-      case 'bf':
-        stage.getBoyfriend(true);
-      case 'dad':
-        stage.getDad(true);
-      case 'gf':
-        stage.getGirlfriend(true);
-    }
-
+    // Remove the old sprite and its slot mapping when the slot is occupied.
     if (oldCharacter != null)
     {
+      switch (target)
+      {
+        case 'bf':
+          stage.getBoyfriend(true);
+        case 'dad':
+          stage.getDad(true);
+        case 'gf':
+          stage.getGirlfriend(true);
+      }
+
       oldCharacter.characterType = CharacterType.OTHER;
       oldCharacter.destroy();
     }
