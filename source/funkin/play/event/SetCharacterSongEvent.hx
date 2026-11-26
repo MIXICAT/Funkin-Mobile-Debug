@@ -81,7 +81,7 @@ class SetCharacterSongEvent extends SongEvent
 
     if (oldCharacter != null)
     {
-      oldCharacter.characterType = null;
+      oldCharacter.characterType = CharacterType.OTHER;
       oldCharacter.destroy();
     }
 
